@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Word Unscramble</title>
+<link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="game-wrap">
+  <div class="timer-bar-track"><div class="timer-bar-fill" id="bar"></div></div>
+  <div class="timer-text" id="timeText"></div>
+  <h1 class="title">🔤 Unscramble It</h1>
+  <p class="subtitle">Rearrange the letters to form a real word (tech-themed).</p>
+  <div id="scrambled" style="font-size:34px;letter-spacing:6px;font-weight:700;margin-bottom:20px;"></div>
+  <input class="text-input" id="ans" type="text" autocomplete="off" placeholder="Your answer">
+  <div style="margin-top:14px;"><button class="btn" id="submit">Submit</button></div>
+  <div id="msg" style="margin-top:12px;color:var(--text-dim);font-size:13px;"></div>
+</div>
+<script src="../shared/distraction-kit.js"></script>
+<script>
+  const WORDS = ['ARRAY','DEBUG','LOGIC','QUEUE','STACK','LINUX','CACHE','KEYS','LOOP','CODE'];
+  const word = WORDS[Math.floor(Math.random()*WORDS.length)];
+
+  function scramble(w) {
+    let arr = w.split('');
+    let s;
+    do {
+      for (let i = arr.length-1; i>0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]] = [arr[j],arr[i]];
+      }
+      s = arr.join('');
+    } while (s === w && w.length > 1);
+    return s;
+  }
+
+  document.getElementById('scrambled').textContent = scramble(word);
+  const ansEl = document.getElementById('ans');
+  const msgEl = document.getElementById('msg');
+
+  function submit() {
+    const val = ansEl.value.trim().toUpperCase();
+    if (val === word) {
+      msgEl.textContent = 'Correct! ✓';
+      DistractionKit.finish('pass');
+    } else {
+      msgEl.textContent = 'Wrong word! ✗';
+      DistractionKit.finish('fail');
+    }
+  }
+  document.getElementById('submit').addEventListener('click', submit);
+  ansEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+
+  DistractionKit.startTimer(document.getElementById('bar'), document.getElementById('timeText'));
+  ansEl.focus();
+</script>
+</body>
+</html>

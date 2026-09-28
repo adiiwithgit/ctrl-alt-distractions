@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sequence Memory</title>
+<link rel="stylesheet" href="../shared/styles.css">
+<style>
+  .simon-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:12px; max-width:260px; margin:0 auto; }
+  .simon-tile { aspect-ratio:1; border-radius:14px; cursor:pointer; transition: filter .1s; }
+  .simon-tile.lit { filter: brightness(1.8); }
+  #s0{background:#ff5c7c} #s1{background:#22e2c8} #s2{background:#7c5cff} #s3{background:#ffd166}
+</style>
+</head>
+<body>
+<div class="game-wrap">
+  <div class="timer-bar-track"><div class="timer-bar-fill" id="bar"></div></div>
+  <div class="timer-text" id="timeText"></div>
+  <h1 class="title">🧠 Repeat the Sequence</h1>
+  <p class="subtitle" id="instr">Watch, then click the tiles in the same order.</p>
+  <div class="simon-grid">
+    <div class="simon-tile" id="s0" data-i="0"></div>
+    <div class="simon-tile" id="s1" data-i="1"></div>
+    <div class="simon-tile" id="s2" data-i="2"></div>
+    <div class="simon-tile" id="s3" data-i="3"></div>
+  </div>
+</div>
+<script src="../shared/distraction-kit.js"></script>
+<script>
+  const instr = document.getElementById('instr');
+  const tiles = [...document.querySelectorAll('.simon-tile')];
+  const SEQ_LEN = 4;
+  const sequence = Array.from({length: SEQ_LEN}, () => Math.floor(Math.random()*4));
+  let playerIndex = 0;
+  let accepting = false;
+
+  async function playSequence() {
+    instr.textContent = 'Watch closely...';
+    await sleep(600);
+    for (const i of sequence) {
+      tiles[i].classList.add('lit');
+      await sleep(450);
+      tiles[i].classList.remove('lit');
+      await sleep(200);
+    }
+    instr.textContent = 'Your turn!';
+    accepting = true;
+  }
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  tiles.forEach(t => t.addEventListener('click', () => {
+    if (!accepting) return;
+    const i = parseInt(t.dataset.i, 10);
+    t.classList.add('lit');
+    setTimeout(() => t.classList.remove('lit'), 150);
+    if (i !== sequence[playerIndex]) {
+      accepting = false;
+      instr.textContent = 'Wrong tile! ✗';
+      DistractionKit.finish('fail');
+      return;
+    }
+    playerIndex++;
+    if (playerIndex === sequence.length) {
+      accepting = false;
+      instr.textContent = 'Sequence complete! ✓';
+      DistractionKit.finish('pass');
+    }
+  }));
+
+  DistractionKit.startTimer(document.getElementById('bar'), document.getElementById('timeText'));
+  playSequence();
+</script>
+</body>
+</html>

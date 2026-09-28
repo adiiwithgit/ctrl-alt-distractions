@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Math Sprint</title>
+<link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="game-wrap">
+  <div class="timer-bar-track"><div class="timer-bar-fill" id="bar"></div></div>
+  <div class="timer-text" id="timeText"></div>
+  <h1 class="title">➗ Math Sprint</h1>
+  <p class="subtitle">Solve 3 quick sums in a row. One wrong answer = fail.</p>
+  <div id="q" style="font-size:36px;margin-bottom:16px;font-weight:600;"></div>
+  <input class="text-input" id="ans" type="number" autocomplete="off" placeholder="Answer">
+  <div style="margin-top:14px;"><button class="btn" id="submit">Submit</button></div>
+  <div id="progress" style="margin-top:12px;color:var(--text-dim);font-size:13px;"></div>
+</div>
+<script src="../shared/distraction-kit.js"></script>
+<script>
+  const qEl = document.getElementById('q');
+  const ansEl = document.getElementById('ans');
+  const progressEl = document.getElementById('progress');
+  const TOTAL = 3;
+  let solved = 0;
+  let current;
+
+  function newQuestion() {
+    const a = Math.floor(Math.random()*40)+1;
+    const b = Math.floor(Math.random()*40)+1;
+    const ops = ['+','-','×'];
+    const op = ops[Math.floor(Math.random()*ops.length)];
+    let answer;
+    if (op === '+') answer = a+b;
+    else if (op === '-') answer = a-b;
+    else answer = a*b;
+    current = answer;
+    qEl.textContent = `${a} ${op} ${b} = ?`;
+    ansEl.value = '';
+    ansEl.focus();
+    progressEl.textContent = `${solved} / ${TOTAL} solved`;
+  }
+
+  function submit() {
+    const val = parseInt(ansEl.value, 10);
+    if (isNaN(val)) return;
+    if (val === current) {
+      solved++;
+      if (solved === TOTAL) {
+        progressEl.textContent = 'All correct! ✓';
+        DistractionKit.finish('pass');
+      } else {
+        newQuestion();
+      }
+    } else {
+      progressEl.textContent = 'Wrong answer! ✗';
+      DistractionKit.finish('fail');
+    }
+  }
+
+  document.getElementById('submit').addEventListener('click', submit);
+  ansEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+
+  DistractionKit.startTimer(document.getElementById('bar'), document.getElementById('timeText'));
+  newQuestion();
+</script>
+</body>
+</html>

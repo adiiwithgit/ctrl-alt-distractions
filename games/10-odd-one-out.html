@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Odd One Out</title>
+<link rel="stylesheet" href="../shared/styles.css">
+<style>.tile{font-size:30px;}</style>
+</head>
+<body>
+<div class="game-wrap">
+  <div class="timer-bar-track"><div class="timer-bar-fill" id="bar"></div></div>
+  <div class="timer-text" id="timeText"></div>
+  <h1 class="title">🔍 Spot the Odd One</h1>
+  <p class="subtitle">Find the one tile that's different from the rest. 2 rounds.</p>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr);max-width:340px;margin:0 auto;" id="board"></div>
+  <div id="progress" style="margin-top:14px;color:var(--text-dim);font-size:13px;"></div>
+</div>
+<script src="../shared/distraction-kit.js"></script>
+<script>
+  const SHAPE_SETS = [
+    {base:'🔵', odd:'🔴'},
+    {base:'⭐', odd:'✨'},
+    {base:'🟢', odd:'🟩'},
+    {base:'⬛', odd:'⬜'},
+  ];
+  const TOTAL_ROUNDS = 2;
+  let round = 0;
+  const board = document.getElementById('board');
+  const progressEl = document.getElementById('progress');
+
+  function render() {
+    const set = SHAPE_SETS[Math.floor(Math.random()*SHAPE_SETS.length)];
+    const oddIndex = Math.floor(Math.random()*9);
+    board.innerHTML = '';
+    for (let i=0;i<9;i++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.textContent = (i === oddIndex) ? set.odd : set.base;
+      tile.addEventListener('click', () => choose(i === oddIndex));
+      board.appendChild(tile);
+    }
+    progressEl.textContent = `Round ${round+1}/${TOTAL_ROUNDS}`;
+  }
+
+  function choose(correct) {
+    if (correct) {
+      round++;
+      if (round === TOTAL_ROUNDS) {
+        progressEl.textContent = 'Sharp eyes! ✓';
+        DistractionKit.finish('pass');
+      } else {
+        render();
+      }
+    } else {
+      progressEl.textContent = 'Wrong tile! ✗';
+      DistractionKit.finish('fail');
+    }
+  }
+
+  DistractionKit.startTimer(document.getElementById('bar'), document.getElementById('timeText'));
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Typing Challenge</title>
+<link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="game-wrap">
+  <div class="timer-bar-track"><div class="timer-bar-fill" id="bar"></div></div>
+  <div class="timer-text" id="timeText"></div>
+  <h1 class="title">⌨️ Type It Exactly</h1>
+  <p class="subtitle">Type the phrase below EXACTLY (case-sensitive) and hit Submit.</p>
+  <div id="phrase" style="font-size:20px;font-weight:700;background:var(--panel);padding:14px;border-radius:10px;margin-bottom:16px;"></div>
+  <input class="text-input" id="ans" type="text" autocomplete="off" placeholder="Type here">
+  <div style="margin-top:14px;"><button class="btn" id="submit">Submit</button></div>
+  <div id="msg" style="margin-top:12px;color:var(--text-dim);font-size:13px;"></div>
+</div>
+<script src="../shared/distraction-kit.js"></script>
+<script>
+  const PHRASES = [
+    'while(!success) tryAgain();',
+    'git commit -m "fix bug"',
+    'return a + b;',
+    'const x = 42;',
+    'npm install express',
+  ];
+  const phrase = PHRASES[Math.floor(Math.random()*PHRASES.length)];
+  document.getElementById('phrase').textContent = phrase;
+  const ansEl = document.getElementById('ans');
+  const msgEl = document.getElementById('msg');
+
+  function submit() {
+    if (ansEl.value === phrase) {
+      msgEl.textContent = 'Exact match! ✓';
+      DistractionKit.finish('pass');
+    } else {
+      msgEl.textContent = 'Not exact! ✗';
+      DistractionKit.finish('fail');
+    }
+  }
+  document.getElementById('submit').addEventListener('click', submit);
+  ansEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+
+  DistractionKit.startTimer(document.getElementById('bar'), document.getElementById('timeText'));
+  ansEl.focus();
+</script>
+</body>
+</html>

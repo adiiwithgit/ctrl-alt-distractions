@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Reflex Tap</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+</head>
+
+<body>
+  <div class="game-wrap">
+    <div class="timer-bar-track">
+      <div class="timer-bar-fill" id="bar"></div>
+    </div>
+    <div class="timer-text" id="timeText"></div>
+    <h1 class="title">⚡ Reflex Tap</h1>
+    <p class="subtitle" id="instr">Wait for the circle to turn GREEN, then tap it. Tap too early = fail.</p>
+    <div id="circle"
+      style="width:160px;height:160px;border-radius:50%;background:#ff5c7c;margin:0 auto;cursor:pointer;transition:background .15s;">
+    </div>
+  </div>
+  <script src="../shared/distraction-kit.js"></script>
+  <script>
+    const circle = document.getElementById('circle');
+    const instr = document.getElementById('instr');
+    let state = 'waiting'; // waiting -> armed -> done
+    let armTimeout;
+
+    function arm() {
+      const delay = 800 + Math.random() * 2500;
+      armTimeout = setTimeout(() => {
+        state = 'armed';
+        circle.style.background = 'var(--success)';
+        instr.textContent = 'TAP NOW!';
+      }, delay);
+    }
+
+    circle.addEventListener('click', () => {
+      if (state === 'waiting') {
+        clearTimeout(armTimeout);
+        instr.textContent = 'Too early! ✗';
+        circle.style.background = '#ff5c7c';
+        DistractionKit.finish('fail');
+      } else if (state === 'armed') {
+        instr.textContent = 'Nice reflexes! ✓';
+        state = 'done';
+        DistractionKit.finish('pass');
+      }
+    });
+
+    DistractionKit.startTimer(document.getElementById('bar'), document.getElementById('timeText'));
+    arm();
+  </script>
+</body>
+
+</html>

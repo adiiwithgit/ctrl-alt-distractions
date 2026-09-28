@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Stroop Test</title>
+<link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="game-wrap">
+  <div class="timer-bar-track"><div class="timer-bar-fill" id="bar"></div></div>
+  <div class="timer-text" id="timeText"></div>
+  <h1 class="title">🎨 Ink, Not Word</h1>
+  <p class="subtitle">Tap the button matching the INK COLOR of the word, not what it says. 3 rounds.</p>
+  <div id="word" style="font-size:44px;font-weight:800;margin-bottom:24px;"></div>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr);" id="opts"></div>
+  <div id="progress" style="margin-top:14px;color:var(--text-dim);font-size:13px;"></div>
+</div>
+<script src="../shared/distraction-kit.js"></script>
+<script>
+  const COLORS = [
+    {name:'RED', hex:'#ff5c7c'},
+    {name:'GREEN', hex:'#2ee6a6'},
+    {name:'BLUE', hex:'#5c8cff'},
+    {name:'YELLOW', hex:'#ffd166'},
+  ];
+  const TOTAL = 3;
+  let round = 0;
+  let currentInk;
+
+  const wordEl = document.getElementById('word');
+  const optsEl = document.getElementById('opts');
+  const progressEl = document.getElementById('progress');
+
+  function render() {
+    const wordChoice = COLORS[Math.floor(Math.random()*COLORS.length)];
+    let inkChoice;
+    do { inkChoice = COLORS[Math.floor(Math.random()*COLORS.length)]; } while (inkChoice.name === wordChoice.name);
+    currentInk = inkChoice;
+    wordEl.textContent = wordChoice.name;
+    wordEl.style.color = inkChoice.hex;
+
+    optsEl.innerHTML = '';
+    const shuffled = [...COLORS].sort(() => Math.random()-0.5);
+    shuffled.forEach(c => {
+      const btn = document.createElement('div');
+      btn.className = 'tile';
+      btn.style.background = c.hex;
+      btn.addEventListener('click', () => choose(c));
+      optsEl.appendChild(btn);
+    });
+    progressEl.textContent = `${round}/${TOTAL}`;
+  }
+
+  function choose(c) {
+    if (c.name === currentInk.name) {
+      round++;
+      if (round === TOTAL) {
+        progressEl.textContent = 'Correct! ✓';
+        DistractionKit.finish('pass');
+      } else {
+        render();
+      }
+    } else {
+      progressEl.textContent = 'Wrong ink! ✗';
+      DistractionKit.finish('fail');
+    }
+  }
+
+  DistractionKit.startTimer(document.getElementById('bar'), document.getElementById('timeText'));
+  render();
+</script>
+</body>
+</html>
